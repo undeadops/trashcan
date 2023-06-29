@@ -50,5 +50,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           platforms: linux/amd64,linux/arm64
-          buildargs: "BUILD_TIME=${{ steps.date.outputs.name }},COMMIT=${{ steps.short-sha.outputs.sha }},RELEASE=${{steps.bump-version-tag.outputs.new_tag}}"
+          #buildargs: "BUILD_TIME=${{ steps.date.outputs.name }},COMMIT=${{ steps.short-sha.outputs.sha }},RELEASE=${{steps.bump-version-tag.outputs.new_tag}}"
           tags: "${{ steps.bump-version-tag.outputs.new_tag }}"
