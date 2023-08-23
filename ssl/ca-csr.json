@@ -1,0 +1,16 @@
+{
+  "CN": "ca.atomicfi.com",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Salt Lake City",
+      "O": "AtomicFI",
+      "OU": "Certificate Authority",
+      "ST": "Utah"
+    }
+  ]
+}

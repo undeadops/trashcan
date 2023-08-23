@@ -1,0 +1,90 @@
+blok:
+  chart: oci://ghcr.io/undeadops/undeadapps
+  version: 0.36.0
+
+clusters:
+  dev-use2:
+    image:
+      tag: "0.2.0"
+    env:
+      FOO: BAR
+  prod-use2:
+    image:
+      tag: "0.0.0"
+    env:
+      FOO: foobar-prod
+
+name: trashcan
+namespace: trashcan
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/undeadops/trashcan
+
+container:
+  command: ["/app/trashcan"]
+  args: ["-bucket", "atmcdev-trashcan-tasklogs"]
+
+env:
+  PORT: 3000
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "alb"
+  annotations:
+    kubernetes.io/ingress-class: "alb"
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/healthcheck-path: /ping
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+  hosts:
+    - host: "trashcan-redux.use2.atmcdev.com"
+      paths:
+        - path: "/"
+          pathType: Prefix
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::303391922817:role/trashcan-svc"
+
+iamRole:
+  create: true
+  name: trashcan-svc
+  description: "trashcan k8s service role"
+  sessionDuration: ""
+  tags:
+    environment: development
+  oidcArn: "arn:aws:iam::303391922817:oidc-provider/oidc.eks.us-east-2.amazonaws.com/id/6B76A5FB41BB3CD0B3836D99595069F8"
+  oidcURL: "oidc.eks.us-east-2.amazonaws.com/id/6B76A5FB41BB3CD0B3836D99595069F8"
+
+iamPolicy:
+  path: "/"
+  description: "permit trashcan k8s service access to S3 bucket"
+  policy: |
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "WebbyS3Bucket",
+          "Action": [
+            "s3:GetObject",
+            "s3:ListBucket",
+            "s3:PutObject"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "arn:aws:s3:::atmcdev-trashcan-tasklogs",
+            "arn:aws:s3:::atmcdev-trashcan-tasklogs/*"
+          ]
+        }
+      ]
+    }
+
+s3bucket:
+  name: atmcdev-trashcan-tasklogs
+  encrypted: true

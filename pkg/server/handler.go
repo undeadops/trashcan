@@ -30,3 +30,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK")
 }
+
+func (s *Server) hello(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, http.StatusOK, "HELLO!")
+}

@@ -2,8 +2,13 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -29,6 +34,7 @@ func SetupServer(ctx context.Context, logger zerolog.Logger, bucket string) *Ser
 	}
 
 	client := s3.NewFromConfig(cfg)
+
 	return &Server{
 		Logger: logger,
 		Client: client,
@@ -50,8 +56,30 @@ func (s *Server) Router() *chi.Mux {
 
 	r.Get("/", s.index)
 	r.Post("/", s.upload)
+	r.Get("/hello", s.hello)
 
 	return r
+}
+
+func SetupClientCerts(certs string) (*tls.Config, error) {
+	clientCerts := strings.Split(certs, ",")
+	caCertPool := x509.NewCertPool()
+
+	for _, c := range clientCerts {
+		caCert, err := ioutil.ReadFile(c)
+		if err != nil {
+			fmt.Printf("failed to read ca pem certificate %s: %v", c, err)
+		}
+		caCertPool.AppendCertsFromPEM(caCert)
+	}
+
+	tlsConfig := &tls.Config{
+		ClientCAs:  caCertPool,
+		ClientAuth: tls.RequireAndVerifyClientCert,
+	}
+	tlsConfig.BuildNameToCertificate()
+
+	return tlsConfig, nil
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

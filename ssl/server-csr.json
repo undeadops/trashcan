@@ -1,0 +1,16 @@
+{
+  "CN": "trashcan",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "Salt Lake City",
+      "O": "AtomicFI",
+      "OU": "Platform",
+      "ST": "Utah"
+    }
+  ]
+}
