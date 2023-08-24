@@ -74,8 +74,9 @@ func SetupClientCerts(certs string) (*tls.Config, error) {
 	}
 
 	tlsConfig := &tls.Config{
-		ClientCAs:  caCertPool,
-		ClientAuth: tls.RequireAndVerifyClientCert,
+		ClientCAs: caCertPool,
+		//ClientAuth: tls.RequireAndVerifyClientCert,
+		ClientAuth: tls.VerifyClientCertIfGiven,
 	}
 	tlsConfig.BuildNameToCertificate()
 

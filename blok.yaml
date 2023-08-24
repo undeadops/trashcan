@@ -1,18 +1,13 @@
 blok:
-  chart: oci://ghcr.io/undeadops/undeadapps
-  version: 0.36.0
+  chart: oci://892765726487.dkr.ecr.us-east-1.amazonaws.com/atomic-apps
+  version: 0.13.0
 
 clusters:
   dev-use2:
     image:
-      tag: "0.2.0"
+      tag: "0.3.0"
     env:
       FOO: BAR
-  prod-use2:
-    image:
-      tag: "0.0.0"
-    env:
-      FOO: foobar-prod
 
 name: trashcan
 namespace: trashcan
@@ -23,11 +18,24 @@ image:
   repository: ghcr.io/undeadops/trashcan
 
 container:
-  command: ["/app/trashcan"]
-  args: ["-bucket", "atmcdev-trashcan-tasklogs"]
+  command: 
+    - "/app/trashcan"
+  args: 
+    - "-bucket"
+    - "atmcdev-trashcan-tasklogs"
+    - "-cert"
+    - "/app/ssl/server.pem"
+    - "-key"
+    - "/app/ssl/server-key.pem"
+    - "-client-ca"
+    - "/app/ssl/ca.pem"
 
 env:
   PORT: 3000
+
+secretVolumes:
+  - name: trashcan-certs
+    mountPath: /app/ssl
 
 service:
   type: ClusterIP
@@ -40,10 +48,14 @@ ingress:
     kubernetes.io/ingress-class: "alb"
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/healthcheck-path: /ping
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /metrics
+    alb.ingress.kubernetes.io/healthcheck-port: 9090
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
   hosts:
-    - host: "trashcan-redux.use2.atmcdev.com"
+    - host: "trashcan.use2.atmcdev.com"
       paths:
         - path: "/"
           pathType: Prefix

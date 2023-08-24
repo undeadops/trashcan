@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -32,5 +33,8 @@ func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) hello(w http.ResponseWriter, r *http.Request) {
+	clientCAs := r.TLS.PeerCertificates
+	fmt.Printf("clientCAs contains: %v", clientCAs)
+
 	respondWithJSON(w, http.StatusOK, "HELLO!")
 }
