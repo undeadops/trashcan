@@ -55,7 +55,6 @@ func (s *Server) Router() *chi.Mux {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Get("/", s.index)
-	r.Post("/", s.upload)
 	r.Get("/hello", s.hello)
 
 	return r

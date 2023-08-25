@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func (s *Server) index(w http.ResponseWriter, r *http.Request) {
+func (s *Server) s3(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Duration(time.Second))
 	defer cancel()
@@ -28,7 +28,7 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, items)
 }
 
-func (s *Server) upload(w http.ResponseWriter, r *http.Request) {
+func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK")
 }
 

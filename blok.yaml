@@ -1,11 +1,11 @@
 blok:
   chart: oci://892765726487.dkr.ecr.us-east-1.amazonaws.com/atomic-apps
-  version: 0.13.0
+  version: 0.15.0
 
 clusters:
   dev-use2:
     image:
-      tag: "0.3.0"
+      tag: "0.4.0"
     env:
       FOO: BAR
 
@@ -18,6 +18,9 @@ image:
   repository: ghcr.io/undeadops/trashcan
 
 container:
+  ports:
+    - port: 3000
+      name: svc
   command: 
     - "/app/trashcan"
   args: 
@@ -38,18 +41,30 @@ secretVolumes:
     mountPath: /app/ssl
 
 service:
-  type: ClusterIP
-  port: 3000
-
+  type: LoadBalancer 
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: trashcan.use2.atmcdev.com
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: TCP
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /ping
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: https
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: deregistration_delay.timeout_seconds=3
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: true
+  ports:
+    - port: 443
+      name: https 
+      targetPort: 3000 
+      protocol: TCP 
+ 
 ingress:
-  enabled: true
+  enabled: false 
   className: "alb"
   annotations:
     kubernetes.io/ingress-class: "alb"
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/healthcheck-path: /metrics
-    alb.ingress.kubernetes.io/healthcheck-port: 9090
+    alb.ingress.kubernetes.io/healthcheck-path: /ping
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
     alb.ingress.kubernetes.io/ssl-redirect: "443"
