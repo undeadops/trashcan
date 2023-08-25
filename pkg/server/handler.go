@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -29,12 +28,19 @@ func (s *Server) s3(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	respondWithJSON(w, http.StatusOK, "OK")
+	clientCAs := r.TLS.PeerCertificates
+	if len(clientCAs) == 0 {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	respondWithJSON(w, http.StatusOK, "OK!")
 }
 
 func (s *Server) hello(w http.ResponseWriter, r *http.Request) {
 	clientCAs := r.TLS.PeerCertificates
-	fmt.Printf("clientCAs contains: %v", clientCAs)
-
+	if len(clientCAs) == 0 {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
 	respondWithJSON(w, http.StatusOK, "HELLO!")
 }
